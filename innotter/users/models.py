@@ -3,7 +3,7 @@ from django.contrib.auth.models import AbstractUser
 
 
 class User(AbstractUser):
-    """Пользователь приложения - администратор, модератор, юзер"""
+    """User - admin/moderator/user"""
 
     class Roles(models.TextChoices):
         USER = 'user'
@@ -16,6 +16,3 @@ class User(AbstractUser):
 
     title = models.CharField(max_length=80)
     is_blocked = models.BooleanField(default=False)
-
-    class Meta:
-        db_table = 'user'

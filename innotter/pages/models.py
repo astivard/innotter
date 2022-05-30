@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Page(models.Model):
-    """Страница пользователя"""
+    """User page"""
 
     name = models.CharField(max_length=80)
     uuid = models.CharField(max_length=30, unique=True)
@@ -19,14 +19,8 @@ class Page(models.Model):
 
     unblock_date = models.DateTimeField(null=True, blank=True)
 
-    class Meta:
-        db_table = 'page'
-
 
 class Tag(models.Model):
-    """Тэги"""
+    """Tag"""
 
     name = models.CharField(max_length=30, unique=True)
-
-    class Meta:
-        db_table = 'tag'
