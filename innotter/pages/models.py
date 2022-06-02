@@ -19,8 +19,14 @@ class Page(models.Model):
 
     unblock_date = models.DateTimeField(null=True, blank=True)
 
+    def __str__(self):
+        return self.name
+
 
 class Tag(models.Model):
     """Tag"""
 
     name = models.CharField(max_length=30, unique=True)
+
+    def __str__(self):
+        return self.name
