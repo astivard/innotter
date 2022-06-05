@@ -3,7 +3,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from posts.models import Post
-from posts.serializers import PostSerializer
+from posts.serializers import PostListSerializer, PostDetailSerializer
 
 
 class PostViewSet(mixins.CreateModelMixin,
@@ -14,8 +14,10 @@ class PostViewSet(mixins.CreateModelMixin,
                   GenericViewSet):
     """Posts"""
 
-    serializer_class = PostSerializer
+    queryset = Post.objects.all()
     permission_classes = (AllowAny,)
 
-    def get_queryset(self):
-        return Post.objects.all()
+    def get_serializer_class(self):
+        if self.action in ('retrieve', 'update'):
+            return PostDetailSerializer
+        return PostListSerializer
