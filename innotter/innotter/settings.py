@@ -125,7 +125,7 @@ JWT_ACCESS_TTL = 5
 JWT_REFRESH_TTL = 60 * 24
 
 REST_FRAMEWORK = {
-   'DEFAULT_AUTHENTICATION_CLASSES': (
-       'rest_framework.authentication.TokenAuthentication',
-   ),
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'users.backends.JWTAuthentication',
+    ),
 }
