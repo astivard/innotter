@@ -1,13 +1,14 @@
 from django.urls import include, path
 from rest_framework import routers
 
-from users.views import UserViewSet, UserRegistrationViewSet, UserLoginViewSet
+from users.views import UserViewSet, UserRegistrationViewSet, UserLoginViewSet, RefreshLoginViewSet
 
 router = routers.DefaultRouter()
 router.register(r'users', UserViewSet, basename='users')
+router.register(r'registration', UserRegistrationViewSet, basename='registration')
+router.register(r'login', UserLoginViewSet, basename='login')
+router.register(r'refresh', RefreshLoginViewSet, basename='refresh')
 
 urlpatterns = [
-    path('api/v1/', include(router.urls)),
-    path('api/v1/registration/', UserRegistrationViewSet.as_view({'post': 'create'})),
-    path('api/v1/login/', UserLoginViewSet.as_view({'post': 'create'})),
+    path('', include(router.urls)),
 ]

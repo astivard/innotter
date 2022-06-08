@@ -8,5 +8,5 @@ router = routers.DefaultRouter()
 router.register(r'posts', PostViewSet, basename='posts')
 
 urlpatterns = [
-    path('api/v1/', include(router.urls)),
+    path('', include(router.urls)),
 ]

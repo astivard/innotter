@@ -1,21 +1,24 @@
-from rest_framework import mixins, viewsets
+from rest_framework import mixins
 from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from users.models import User
-from users.serializers import UserListSerializer, UserDetailSerializer, UserRegistrationSerializer, UserLoginSerializer
+from users.permissions import IsAdminRole
+from users.serializers import UserListSerializer, UserDetailSerializer, UserRegistrationSerializer, UserLoginSerializer, \
+    UserRefreshSerializer
 
 
-class UserViewSet(mixins.CreateModelMixin,
-                  mixins.RetrieveModelMixin,
+class UserViewSet(mixins.RetrieveModelMixin,
                   mixins.UpdateModelMixin,
-                  mixins.DestroyModelMixin,
                   mixins.ListModelMixin,
                   GenericViewSet):
-    """Users"""
+    """
+    Users viewset
+    Only for admin
+    """
 
     queryset = User.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAdminRole,)
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update'):
@@ -23,17 +26,34 @@ class UserViewSet(mixins.CreateModelMixin,
         return UserListSerializer
 
 
-class UserRegistrationViewSet(viewsets.ModelViewSet):
-    """User registration view set (creating new account)"""
+class UserRegistrationViewSet(mixins.CreateModelMixin,
+                              GenericViewSet):
+    """
+    User registration view set (creating new account)
+    """
 
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
 
 
-class UserLoginViewSet(viewsets.ModelViewSet):
-    """User login view set (getting access and refresh token)"""
+class UserLoginViewSet(mixins.CreateModelMixin,
+                       GenericViewSet):
+    """
+    User login viewset (getting access and refresh token)
+    """
 
     queryset = User.objects.all()
     serializer_class = UserLoginSerializer
+    permission_classes = (AllowAny,)
+
+
+class RefreshLoginViewSet(mixins.CreateModelMixin,
+                          GenericViewSet):
+    """
+    User refresh viewset (refreshing token)
+    """
+
+    queryset = User.objects.all()
+    serializer_class = UserRefreshSerializer
     permission_classes = (AllowAny,)

@@ -18,6 +18,7 @@ class Page(models.Model):
     follow_requests = models.ManyToManyField('users.User', related_name='requests')
 
     unblock_date = models.DateTimeField(null=True, blank=True)
+    is_blocked = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name

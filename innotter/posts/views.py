@@ -1,5 +1,5 @@
 from rest_framework import mixins
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from posts.models import Post
@@ -15,7 +15,8 @@ class PostViewSet(mixins.CreateModelMixin,
     """Posts"""
 
     queryset = Post.objects.all()
-    permission_classes = (AllowAny,)
+    permission_classes = (IsAuthenticated,)
+    serializer_class = PostListSerializer
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update'):

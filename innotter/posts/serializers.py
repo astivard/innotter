@@ -8,7 +8,7 @@ class PostListSerializer(PostSerializerMixin):
 
     class Meta:
         model = Post
-        fields = ['id', 'page', 'content', 'reply_to', 'created_at', 'updated_at']
+        fields = ('id', 'page', 'content', 'reply_to', 'created_at', 'updated_at')
 
 
 class PostDetailSerializer(PostSerializerMixin):
@@ -16,4 +16,4 @@ class PostDetailSerializer(PostSerializerMixin):
 
     class Meta:
         model = Post
-        fields = ['id', 'page', 'content', 'reply_to', 'created_at', 'updated_at']
+        fields = ('id', 'page', 'content', 'reply_to', 'created_at', 'updated_at')
