@@ -5,8 +5,8 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.viewsets import GenericViewSet
 
 from pages.models import Page, Tag
-from pages.serializers import PageListSerializer, TagSerializer, UserPageDetailSerializer
-from pages.utils import user_role_serializers_dict
+from pages.serializers import TagSerializer, UserPageDetailSerializer, UserPageListSerializer
+from pages.utils import user_role_detail_serializers_dict, user_role_list_serializers_dict
 
 
 class PagesViewSet(mixins.RetrieveModelMixin,
@@ -22,7 +22,8 @@ class PagesViewSet(mixins.RetrieveModelMixin,
     permission_classes = (IsAuthenticated,)
 
     def get_queryset(self):
-        if self.request.user.role == 'admin':
+        print(f'\nUSER ROLE: {self.request.user.role}\n')
+        if self.request.user.role in ('admin', 'moderator'):
             return Page.objects.all()
         return Page.objects.filter(
             Q(is_blocked=False),
@@ -31,8 +32,8 @@ class PagesViewSet(mixins.RetrieveModelMixin,
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update'):
-            return user_role_serializers_dict.get(self.request.user.role)
-        return PageListSerializer
+            return user_role_detail_serializers_dict.get(self.request.user.role)
+        return user_role_list_serializers_dict.get(self.request.user.role)
 
 
 class CurrentUserPagesViewSet(mixins.CreateModelMixin,
@@ -51,15 +52,15 @@ class CurrentUserPagesViewSet(mixins.CreateModelMixin,
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update'):
             return UserPageDetailSerializer
-        return PageListSerializer
+        return UserPageListSerializer
 
 
-class TagViewSet(mixins.CreateModelMixin,
-                 mixins.RetrieveModelMixin,
-                 mixins.UpdateModelMixin,
-                 mixins.DestroyModelMixin,
-                 mixins.ListModelMixin,
-                 GenericViewSet):
+class TagsViewSet(mixins.CreateModelMixin,
+                  mixins.RetrieveModelMixin,
+                  mixins.UpdateModelMixin,
+                  mixins.DestroyModelMixin,
+                  mixins.ListModelMixin,
+                  GenericViewSet):
     """Tags"""
 
     queryset = Tag.objects.all()
