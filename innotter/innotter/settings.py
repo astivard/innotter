@@ -119,3 +119,13 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
+
+JWT_SECRET = os.getenv('JWT_SECRET')
+JWT_ACCESS_TTL = 5
+JWT_REFRESH_TTL = 60 * 24
+
+REST_FRAMEWORK = {
+   'DEFAULT_AUTHENTICATION_CLASSES': (
+       'rest_framework.authentication.TokenAuthentication',
+   ),
+}
