@@ -1,39 +1,58 @@
-from django.db.models import Q
-from django.utils import timezone
 from rest_framework import mixins
-from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import AllowAny
 from rest_framework.viewsets import GenericViewSet
 
 from pages.models import Page, Tag
-from pages.serializers import TagSerializer, UserPageDetailSerializer, UserPageListSerializer
-from pages.utils import user_role_detail_serializers_dict, user_role_list_serializers_dict
+from pages.serializers import TagSerializer, UserPageDetailSerializer, FollowersListSerializer
+from pages.services import get_unblocked_pages, get_blocked_pages, get_permissions_list, get_page_followers, \
+    follow_page, get_page_follow_requests
+from pages.utils import list_serializer_classes, detail_serializer_classes, action_permission_classes, \
+    user_action_permission_classes
 
 
 class PagesViewSet(mixins.RetrieveModelMixin,
-                   mixins.ListModelMixin,
                    mixins.UpdateModelMixin,
+                   mixins.ListModelMixin,
                    GenericViewSet):
     """
-    Pages
-    List, retrieve, update (only for admins and moders)
-    Non-blocked pages displayed only for admins
+    All pages by all users
+    List, retrieve (for all users)
+    Update is_blocked and (only for admins and moders)
+    Non-blocked pages display only for admins and moders
     """
 
-    permission_classes = (IsAuthenticated,)
+    filter_backends = (SearchFilter,)
+    search_fields = ('name', 'uuid', 'tags__name',)
+
+    @action(detail=False)
+    def blocked(self, request):
+        return get_blocked_pages(self)
+
+    @action(detail=True)
+    def followers(self, request, pk=None):
+        return get_page_followers(self, page_pk=pk)
+
+    @action(detail=True, methods=['post'])
+    def follow(self, request, pk=None):
+        return follow_page(self, page_pk=pk)
 
     def get_queryset(self):
-        print(f'\nUSER ROLE: {self.request.user.role}\n')
         if self.request.user.role in ('admin', 'moderator'):
-            return Page.objects.all()
-        return Page.objects.filter(
-            Q(is_blocked=False),
-            Q(unblock_date__isnull=True) | Q(unblock_date__lt=timezone.now())
-        )
+            return Page.objects.all().order_by('id')
+        return get_unblocked_pages(is_owner_page=False)
 
     def get_serializer_class(self):
-        if self.action in ('retrieve', 'update'):
-            return user_role_detail_serializers_dict.get(self.request.user.role)
-        return user_role_list_serializers_dict.get(self.request.user.role)
+        user_role = self.request.user.role
+        if self.action in ('list', 'blocked'):
+            return list_serializer_classes.get(user_role)
+        elif self.action == 'followers':
+            return FollowersListSerializer
+        return detail_serializer_classes.get(user_role)
+
+    def get_permissions(self):
+        return get_permissions_list(self, permission_classes_dict=action_permission_classes)
 
 
 class CurrentUserPagesViewSet(mixins.CreateModelMixin,
@@ -42,17 +61,33 @@ class CurrentUserPagesViewSet(mixins.CreateModelMixin,
                               mixins.DestroyModelMixin,
                               mixins.ListModelMixin,
                               GenericViewSet):
-    """Current user pages"""
+    """
+    Current user pages
+    Retrieve, create, update, delete page
+    """
 
-    permission_classes = (IsAuthenticated,)
+    @action(detail=True)
+    def followers(self, request, pk=None):
+        return get_page_followers(self, page_pk=pk)
+
+    @action(detail=True, url_path='follow-requests')
+    def follow_requests(self, request, pk=None):
+        return get_page_follow_requests(self, page_pk=pk)
 
     def get_queryset(self):
-        return Page.objects.filter(owner=self.request.user)
+        return get_unblocked_pages(is_owner_page=True, owner=self.request.user)
 
     def get_serializer_class(self):
-        if self.action in ('retrieve', 'update'):
-            return UserPageDetailSerializer
-        return UserPageListSerializer
+        user_role = self.request.user.role
+        if self.action == 'list':
+            return list_serializer_classes.get(user_role)
+        elif self.action == 'follow_requests':
+            return FollowersListSerializer
+        return detail_serializer_classes.get(user_role) if user_role in ('admin', 'moderator') \
+            else UserPageDetailSerializer
+
+    def get_permissions(self):
+        return get_permissions_list(self, permission_classes_dict=user_action_permission_classes)
 
 
 class TagsViewSet(mixins.CreateModelMixin,
