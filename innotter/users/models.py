@@ -1,5 +1,5 @@
-from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db import models
 
 
 class User(AbstractUser):
@@ -17,23 +17,5 @@ class User(AbstractUser):
     title = models.CharField(max_length=80)
     is_blocked = models.BooleanField(default=False)
 
-    __original_user_role = None
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.__original_user_role = self.role
-
     def __str__(self):
         return self.username
-
-    def save(self, *args, **kwargs):
-        if self.role != self.__original_user_role and self.role == 'admin':
-            self.is_superuser = True
-            self.is_staff = True
-        else:
-            self.is_superuser = False
-            self.is_staff = False
-        super().save(*args, **kwargs)
-        self.__original_user_role = self.role
-
-

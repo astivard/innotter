@@ -7,6 +7,7 @@ from users.models import User
 from users.permissions import IsAdminRole
 from users.serializers import UserListSerializer, UserDetailSerializer, UserRegistrationSerializer, UserLoginSerializer, \
     UserRefreshSerializer
+from users.services import block_or_unblock_all_pages, set_access_to_admin_panel
 
 
 class UserViewSet(mixins.RetrieveModelMixin,
@@ -18,13 +19,26 @@ class UserViewSet(mixins.RetrieveModelMixin,
     Only for admin
     """
 
-    queryset = User.objects.all()
+    queryset = User.objects.all().order_by('id')
     permission_classes = (IsAuthenticated, IsAdminRole,)
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update'):
             return UserDetailSerializer
         return UserListSerializer
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        if 'is_blocked' in request.data:
+            block_or_unblock_all_pages(user=instance)
+        elif 'role' in request.data:
+            set_access_to_admin_panel(user=instance)
+        return Response(serializer.data)
 
 
 class UserRegistrationViewSet(mixins.CreateModelMixin,

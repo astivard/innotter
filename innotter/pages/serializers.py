@@ -11,7 +11,7 @@ class UserPageListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Page
-        fields = ('id', 'name', 'uuid', 'image', 'owner', 'is_private',)
+        fields = ('id', 'name', 'uuid', 'image', 'owner', 'is_private', 'is_blocked',)
 
 
 class StaffPageListSerializer(serializers.ModelSerializer):
@@ -48,7 +48,8 @@ class UserPageDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = Page
         fields = ('id', 'name', 'uuid', 'description', 'tags', 'owner', 'image', 'followers', 'is_private',
-                  'follow_requests', 'is_blocked', 'unblock_date')
+                  'follow_requests',)
+        read_only_fields = ('followers', 'follow_requests',)
 
 
 class AdminPageDetailSerializer(serializers.ModelSerializer):
@@ -95,9 +96,29 @@ class FollowersListSerializer(serializers.ModelSerializer):
         fields = ('id', 'username', 'title', 'email',)
 
 
+class FollowerSerializer(serializers.ModelSerializer):
+    """Serializer for accepting follow request"""
+
+    email = serializers.EmailField(required=True)
+
+    class Meta:
+        model = User
+        fields = ('email',)
+
+
 class TagSerializer(serializers.ModelSerializer):
     """Tags serializer"""
 
     class Meta:
         model = Tag
         fields = ('id', 'name')
+
+
+class AddTagSerializer(serializers.ModelSerializer):
+    """Add tag to page serializer"""
+
+    name = serializers.CharField(max_length=30, required=True)
+
+    class Meta:
+        model = Tag
+        fields = ('name',)

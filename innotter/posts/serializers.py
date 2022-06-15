@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
-from posts.models import Post
 from pages.models import Page
+from posts.models import Post
 
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -35,3 +35,15 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     def get_reply_to_id(self, post):
         return post.reply_to.pk if post.reply_to else None
+
+
+class HomeSerializer(serializers.ModelSerializer):
+    """Serializer for feed with posts"""
+
+    page = serializers.SlugRelatedField(slug_field='name', read_only=True)
+    reply_to = serializers.SlugRelatedField(slug_field='content', read_only=True)
+    created_at = serializers.DateTimeField(format='%d-%m-%Y %H:%M')
+
+    class Meta:
+        model = Post
+        fields = ('id', 'page', 'content', 'reply_to', 'created_at',)
