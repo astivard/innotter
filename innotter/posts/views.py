@@ -37,7 +37,7 @@ class UserPostsViewSet(mixins.CreateModelMixin,
         return get_posts(is_owner_posts=True, owner=self.request.user)
 
     def get_serializer_class(self):
-        if self.action in ('retrieve', 'update'):
+        if self.action in ('retrieve', 'update', 'partial_update'):
             return PostDetailSerializer
         return PostListSerializer
 

@@ -9,6 +9,10 @@ djangorestframework = "3.13.1"
 python-dotenv = "0.20.0"
 psycopg2-binary = "2.9.3"
 pyjwt = "2.4.0"
+boto3 = "1.24.9"
+django-storages = "1.12.3"
+pillow = "9.1.1"
+celery = "5.2.7"
 
 [dev-packages]
 
