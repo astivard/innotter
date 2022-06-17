@@ -17,7 +17,8 @@ def _generate_jwt_token(is_access: bool, to_refresh: bool, validated_data) -> st
     """Generate acces or refresh token"""
 
     payload = _create_payload(is_access=is_access, to_refresh=to_refresh, validated_data=validated_data)
-    return jwt.encode(payload=payload, key=JWT_SECRET)
+    token = jwt.encode(payload=payload, key=JWT_SECRET)
+    return token
 
 
 def _create_payload(is_access: bool, to_refresh: bool, validated_data) -> dict:
@@ -25,8 +26,8 @@ def _create_payload(is_access: bool, to_refresh: bool, validated_data) -> dict:
 
     payload = {
         'iss': 'backend-api',
-        'id': validated_data['payload']['user_id'] if to_refresh else validated_data['user'].id,
+        'token_type': 'access' if is_access else 'refresh',
+        'user_id': validated_data['payload']['user_id'] if to_refresh else validated_data['user'].id,
         'exp': datetime.utcnow() + timedelta(minutes=JWT_ACCESS_TTL if is_access else JWT_REFRESH_TTL),
-        'type': 'access' if is_access else 'refresh'
     }
     return payload

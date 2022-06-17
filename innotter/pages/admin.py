@@ -4,7 +4,7 @@ from pages.models import Page, Tag
 
 
 class PageAdmin(admin.ModelAdmin):
-    list_display = ('id', 'name', 'uuid', 'owner', 'is_private')
+    list_display = ('id', 'name', 'uuid', 'is_blocked', 'is_private', 'owner')
     list_display_links = ('id', 'name')
 
 

@@ -1,5 +1,6 @@
-from rest_framework import mixins
-from rest_framework.permissions import AllowAny
+from rest_framework import mixins, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from users.models import User
@@ -18,7 +19,7 @@ class UserViewSet(mixins.RetrieveModelMixin,
     """
 
     queryset = User.objects.all()
-    permission_classes = (IsAdminRole,)
+    permission_classes = (IsAuthenticated, IsAdminRole,)
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'update'):
@@ -43,8 +44,8 @@ class UserLoginViewSet(mixins.CreateModelMixin,
     User login viewset (getting access and refresh token)
     """
 
-    queryset = User.objects.all()
     serializer_class = UserLoginSerializer
+    queryset = User.objects.all()
     permission_classes = (AllowAny,)
 
 
@@ -57,3 +58,9 @@ class RefreshLoginViewSet(mixins.CreateModelMixin,
     queryset = User.objects.all()
     serializer_class = UserRefreshSerializer
     permission_classes = (AllowAny,)
+
+    def post(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_202_ACCEPTED, headers=headers)

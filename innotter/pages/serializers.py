@@ -1,49 +1,63 @@
 from rest_framework import serializers
 
 from pages.models import Page, Tag
+from users.models import User
 
 
-class PageListSerializer(serializers.ModelSerializer):
-    """Serializer for list of pages"""
+class UserPageListSerializer(serializers.ModelSerializer):
+    """Serializer for list of pages for users."""
+
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Page
-        fields = ('id', 'name', 'uuid', 'description', 'image', 'tags', 'owner', 'is_private')
-        extra_kwargs = {'description': {'write_only': True},
-                        'tags': {'write_only': True},
-                        'image': {'write_only': True}}
+        fields = ('id', 'name', 'uuid', 'image', 'owner', 'is_private',)
+
+
+class StaffPageListSerializer(serializers.ModelSerializer):
+    """Serializer for list of pages for admins."""
+
+    class Meta:
+        model = Page
+        fields = ('id', 'name', 'uuid', 'owner', 'owner_id', 'image',
+                  'is_private', 'is_blocked', 'unblock_date')
 
 
 class PageDetailSerializer(serializers.ModelSerializer):
-    """Serializer for a simple page overview for any user"""
+    """Serializer for a simple page overview for any user."""
+
+    owner = serializers.ReadOnlyField(source='owner.username')
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', allow_null=True)
+    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
 
     class Meta:
         model = Page
         fields = ('name', 'uuid', 'description', 'tags', 'owner', 'image', 'followers', 'is_private')
         read_only_fields = ('name', 'uuid', 'description', 'tags', 'owner', 'image', 'followers', 'is_private')
 
-    owner = serializers.ReadOnlyField(source='owner.username')
-    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', allow_null=True)
-    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
-
 
 class UserPageDetailSerializer(serializers.ModelSerializer):
     """Serializer for separate page for users only"""
+
+    owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
+    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username')
+    follow_requests = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username')
+    tags = serializers.SlugRelatedField(many=True, slug_field='name', queryset=Tag.objects.all())
+    is_private = serializers.BooleanField(required=True)
 
     class Meta:
         model = Page
         fields = ('id', 'name', 'uuid', 'description', 'tags', 'owner', 'image', 'followers', 'is_private',
                   'follow_requests', 'is_blocked', 'unblock_date')
-        read_only_fields = ('image',)
-
-    owner = serializers.ReadOnlyField(source='owner.username')
-    tags = serializers.SlugRelatedField(many=True, slug_field='name', allow_null=True, queryset=Tag.objects.all())
-    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
-    follow_requests = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
 
 
 class AdminPageDetailSerializer(serializers.ModelSerializer):
     """Serializer for separate page for admins only"""
+
+    owner = serializers.ReadOnlyField(source='owner.username')
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', allow_null=True)
+    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
+    is_blocked = serializers.BooleanField()
 
     class Meta:
         model = Page
@@ -52,14 +66,14 @@ class AdminPageDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'uuid', 'description', 'tags', 'owner', 'image', 'followers',
                             'is_private')
 
-    owner = serializers.ReadOnlyField(source='owner.username')
-    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', allow_null=True)
-    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
-    unblock_date = serializers.DateTimeField(format='%d-%m-%Y %H:%M:%S')
-
 
 class ModerPageDetailSerializer(serializers.ModelSerializer):
     """Serializer for separate page for moderators only"""
+
+    owner = serializers.ReadOnlyField(source='owner.username')
+    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', allow_null=True)
+    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
+    unblock_date = serializers.DateTimeField(required=True)
 
     class Meta:
         model = Page
@@ -68,10 +82,17 @@ class ModerPageDetailSerializer(serializers.ModelSerializer):
         read_only_fields = ('id', 'name', 'uuid', 'description', 'tags', 'owner', 'image', 'followers',
                             'is_private', 'is_blocked')
 
-    owner = serializers.ReadOnlyField(source='owner.username')
-    tags = serializers.SlugRelatedField(many=True, read_only=True, slug_field='name', allow_null=True)
-    followers = serializers.SlugRelatedField(many=True, read_only=True, slug_field='username', allow_null=True)
-    unblock_date = serializers.DateTimeField(format='%d-%m-%Y %H:%M:%S')
+
+class FollowersListSerializer(serializers.ModelSerializer):
+    """
+    Serializer for list of users that following page
+    Methods: list
+    For any user
+    """
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'title', 'email',)
 
 
 class TagSerializer(serializers.ModelSerializer):
