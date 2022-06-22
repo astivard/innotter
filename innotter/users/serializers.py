@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from users.models import User
-from users.utils import UserRegistrationSerializerMethods, UserLoginSerializerMethods, UserRefreshSerializerMethods
+from users.utils import (UserLoginSerializerMethods,
+                         UserRefreshSerializerMethods,
+                         UserRegistrationSerializerMethods)
 
 
 class UserListSerializer(serializers.ModelSerializer):
@@ -13,7 +15,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'title', 'email', 'role', 'image', 'is_blocked')
+        fields = ("id", "username", "title", "email", "role", "is_blocked")
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -25,8 +27,16 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'title', 'email', 'role', 'image', 'is_blocked',)
-        read_only_fields = ('id', 'username', 'title', 'email', 'image')
+        fields = (
+            "id",
+            "username",
+            "title",
+            "email",
+            "role",
+            "image_s3_path",
+            "is_blocked",
+        )
+        read_only_fields = ("id", "username", "title", "email", "image")
 
     is_blocked = serializers.BooleanField()
 
@@ -39,8 +49,20 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'title', 'email', 'role', 'image',)
-        read_only_fields = ('role',)
+        fields = (
+            "id",
+            "username",
+            "title",
+            "email",
+            "role",
+            "image_s3_path",
+        )
+        read_only_fields = (
+            "username",
+            "title",
+            "email",
+            "role",
+        )
 
 
 class UserRegistrationSerializer(UserRegistrationSerializerMethods):
@@ -48,8 +70,8 @@ class UserRegistrationSerializer(UserRegistrationSerializerMethods):
 
     class Meta:
         model = User
-        fields = ('username', 'title', 'email', 'password')
-        extra_kwargs = {'password': {'write_only': True}}
+        fields = ("username", "title", "email", "password")
+        extra_kwargs = {"password": {"write_only": True}}
 
 
 class UserLoginSerializer(UserLoginSerializerMethods):

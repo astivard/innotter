@@ -12,6 +12,6 @@ router.registry.extend(posts_router.registry)
 router.registry.extend(users_router.registry)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('api/v1/', include(router.urls)),
+    path("admin/", admin.site.urls),
+    path("api/v1/", include(router.urls)),
 ]
