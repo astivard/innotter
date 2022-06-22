@@ -10,10 +10,6 @@ from pages.models import Page
 from pages.tasks import upload_file_to_s3
 from users.models import User
 
-client = boto3.client(
-    "s3", aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
-)
-
 
 def upload_user_image_to_s3(file_path: str, user: User) -> str:
     if not is_allowed_file_extension(file_path=file_path):
@@ -37,6 +33,9 @@ def upload_user_image_to_s3(file_path: str, user: User) -> str:
 
 
 def get_presigned_url(key: str) -> str:
+    client = boto3.client(
+        "s3", aws_access_key_id=settings.AWS_ACCESS_KEY_ID, aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY
+    )
     presigned_url = client.generate_presigned_url(
         ClientMethod="get_object",
         Params={"Bucket": settings.AWS_STORAGE_BUCKET_NAME, "Key": key},
