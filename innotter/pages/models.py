@@ -12,7 +12,7 @@ class Page(models.Model):
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE, related_name='pages')
     followers = models.ManyToManyField('users.User', related_name='follows')
 
-    image = models.URLField(null=True, blank=True)
+    image = models.ImageField(upload_to='pages/%Y/%m/%d/', null=True, blank=True, max_length=200)
 
     is_private = models.BooleanField(default=False)
     follow_requests = models.ManyToManyField('users.User', related_name='requests')

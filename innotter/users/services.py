@@ -3,6 +3,26 @@ from datetime import datetime, timedelta
 import jwt
 
 from innotter.settings import JWT_SECRET, JWT_ACCESS_TTL, JWT_REFRESH_TTL
+from pages.models import Page
+from users.models import User
+
+
+def block_or_unblock_all_pages(user: User):
+    pages = Page.objects.filter(owner=user)
+    for page in pages:
+        page.is_blocked = user.is_blocked
+        page.save()
+
+
+def set_access_to_admin_panel(user: User):
+    if user.role == 'admin':
+        user.is_staff = True
+        user.is_superuser = True
+        user.save()
+    else:
+        user.is_staff = False
+        user.is_superuser = False
+        user.save()
 
 
 def create_jwt_token_dict(to_refresh: bool, validated_data) -> dict:

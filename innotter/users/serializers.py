@@ -13,7 +13,7 @@ class UserListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'title', 'email', 'role', 'image_s3_path', 'is_blocked')
+        fields = ('id', 'username', 'title', 'email', 'role', 'image', 'is_blocked')
 
 
 class UserDetailSerializer(serializers.ModelSerializer):
@@ -25,10 +25,22 @@ class UserDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = User
-        fields = ('id', 'username', 'title', 'email', 'role', 'image_s3_path', 'is_blocked')
-        read_only_fields = ('id', 'username', 'title', 'email', 'image_s3_path')
+        fields = ('id', 'username', 'title', 'email', 'role', 'image', 'is_blocked',)
+        read_only_fields = ('id', 'username', 'title', 'email', 'image')
 
     is_blocked = serializers.BooleanField()
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    """
+    Seriazizer for user profile
+    User can check his profile and update it
+    """
+
+    class Meta:
+        model = User
+        fields = ('id', 'username', 'title', 'email', 'role', 'image',)
+        read_only_fields = ('role',)
 
 
 class UserRegistrationSerializer(UserRegistrationSerializerMethods):
