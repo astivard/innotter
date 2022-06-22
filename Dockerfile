@@ -12,4 +12,5 @@ RUN pipenv lock && pipenv install --system
 
 COPY . /app/
 
-ENTRYPOINT ["./entrypoint.sh"]
+RUN chmod +x ./entrypoint.sh
+RUN chmod +x ./entrypoint_celery.sh

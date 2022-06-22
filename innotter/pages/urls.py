@@ -1,6 +1,6 @@
 from rest_framework import routers
 
-from pages.views import PagesViewSet, CurrentUserPagesViewSet, TagsViewSet
+from pages.views import CurrentUserPagesViewSet, PagesViewSet, TagsViewSet
 
 router = routers.DefaultRouter()
 router.register(r'pages', PagesViewSet, basename='pages')
