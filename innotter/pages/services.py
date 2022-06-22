@@ -1,13 +1,14 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework.exceptions import ValidationError, NotFound
+from rest_framework.exceptions import NotFound, ValidationError
 from rest_framework.response import Response
 
 from pages.models import Page, Tag
 from pages.tasks import upload_file_to_s3
 from users.models import User
-from users.services import is_allowed_file_extension, generate_file_name, get_presigned_url
+from users.services import (generate_file_name, get_presigned_url,
+                            is_allowed_file_extension)
 
 
 def get_permissions_list(self, permission_classes_dict: dict) -> list:

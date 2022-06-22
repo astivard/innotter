@@ -8,7 +8,7 @@ class PostListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'content', 'page', 'reply_to', 'created_at', 'updated_at')
+        fields = ("id", "content", "page", "reply_to", "created_at", "updated_at")
 
 
 class PostDetailSerializer(serializers.ModelSerializer):
@@ -19,8 +19,8 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Post
-        fields = ('id', 'content', 'page', 'page_name', 'reply_to', 'reply_to_content', 'created_at', 'updated_at')
-        read_only_fields = ('page', 'created_at', 'updated_at')
+        fields = ("id", "content", "page", "page_name", "reply_to", "reply_to_content", "created_at", "updated_at")
+        read_only_fields = ("page", "created_at", "updated_at")
 
     def get_page_name(self, post):
         return post.page.name
@@ -32,10 +32,16 @@ class PostDetailSerializer(serializers.ModelSerializer):
 class HomeSerializer(serializers.ModelSerializer):
     """Serializer for feed with posts"""
 
-    page = serializers.SlugRelatedField(slug_field='name', read_only=True)
-    reply_to = serializers.SlugRelatedField(slug_field='content', read_only=True)
-    created_at = serializers.DateTimeField(format='%d-%m-%Y %H:%M')
+    page = serializers.SlugRelatedField(slug_field="name", read_only=True)
+    reply_to = serializers.SlugRelatedField(slug_field="content", read_only=True)
+    created_at = serializers.DateTimeField(format="%d-%m-%Y %H:%M")
 
     class Meta:
         model = Post
-        fields = ('id', 'page', 'content', 'reply_to', 'created_at',)
+        fields = (
+            "id",
+            "page",
+            "content",
+            "reply_to",
+            "created_at",
+        )

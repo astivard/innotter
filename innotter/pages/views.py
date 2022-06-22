@@ -4,39 +4,25 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-from users.permissions import IsAdminRole, IsBlockedUser, IsModerRole
 
 from pages.models import Page, Tag
-from pages.serializers import (
-    AdminPageDetailSerializer,
-    FollowersListSerializer,
-    ModerPageDetailSerializer,
-    PageDetailSerializer,
-    StaffPageListSerializer,
-    TagSerializer,
-    UserPageDetailSerializer,
-    UserPageListSerializer,
-    FollowerSerializer,
-    AddRemoveTagSerializer,
-)
-from pages.services import (
-    accept_all_follow_requests,
-    accept_follow_request,
-    add_tag_to_page,
-    deny_all_follow_requests,
-    deny_follow_request,
-    follow_page,
-    get_blocked_pages,
-    get_page_follow_requests,
-    get_page_followers,
-    get_page_tags,
-    get_permissions_list,
-    get_unblocked_pages,
-    remove_tag_from_page,
-    unfollow_page,
-)
+from pages.serializers import (AddRemoveTagSerializer,
+                               AdminPageDetailSerializer, FollowerSerializer,
+                               FollowersListSerializer,
+                               ModerPageDetailSerializer, PageDetailSerializer,
+                               StaffPageListSerializer, TagSerializer,
+                               UserPageDetailSerializer,
+                               UserPageListSerializer)
+from pages.services import (accept_all_follow_requests, accept_follow_request,
+                            add_tag_to_page, deny_all_follow_requests,
+                            deny_follow_request, follow_page,
+                            get_blocked_pages, get_page_follow_requests,
+                            get_page_followers, get_page_tags,
+                            get_permissions_list, get_unblocked_pages,
+                            remove_tag_from_page, unfollow_page,
+                            upload_page_image_to_s3)
+from users.permissions import IsAdminRole, IsBlockedUser, IsModerRole
 from users.services import get_presigned_url
-from pages.services import upload_page_image_to_s3
 
 
 class PagesViewSet(

@@ -5,20 +5,12 @@ from rest_framework.viewsets import GenericViewSet
 
 from users.models import User
 from users.permissions import IsAdminRole, IsBlockedUser
-from users.serializers import (
-    UserDetailSerializer,
-    UserListSerializer,
-    UserLoginSerializer,
-    UserProfileSerializer,
-    UserRefreshSerializer,
-    UserRegistrationSerializer,
-)
-from users.services import (
-    block_or_unblock_all_pages,
-    set_access_to_admin_panel,
-    upload_user_image_to_s3,
-    get_presigned_url,
-)
+from users.serializers import (UserDetailSerializer, UserListSerializer,
+                               UserLoginSerializer, UserProfileSerializer,
+                               UserRefreshSerializer,
+                               UserRegistrationSerializer)
+from users.services import (block_or_unblock_all_pages, get_presigned_url,
+                            set_access_to_admin_panel, upload_user_image_to_s3)
 
 
 class UserViewSet(mixins.RetrieveModelMixin, mixins.UpdateModelMixin, mixins.ListModelMixin, GenericViewSet):

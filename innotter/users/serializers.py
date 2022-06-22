@@ -1,7 +1,9 @@
 from rest_framework import serializers
 
 from users.models import User
-from users.utils import UserLoginSerializerMethods, UserRefreshSerializerMethods, UserRegistrationSerializerMethods
+from users.utils import (UserLoginSerializerMethods,
+                         UserRefreshSerializerMethods,
+                         UserRegistrationSerializerMethods)
 
 
 class UserListSerializer(serializers.ModelSerializer):

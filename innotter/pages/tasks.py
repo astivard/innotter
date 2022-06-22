@@ -1,4 +1,5 @@
 from django.conf import settings
+
 from innotter.celery import app
 from users.services import client
 

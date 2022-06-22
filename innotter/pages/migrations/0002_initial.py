@@ -11,28 +11,30 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
-        ('pages', '0001_initial'),
+        ("pages", "0001_initial"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='page',
-            name='follow_requests',
-            field=models.ManyToManyField(related_name='requests', to=settings.AUTH_USER_MODEL),
+            model_name="page",
+            name="follow_requests",
+            field=models.ManyToManyField(related_name="requests", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='page',
-            name='followers',
-            field=models.ManyToManyField(related_name='follows', to=settings.AUTH_USER_MODEL),
+            model_name="page",
+            name="followers",
+            field=models.ManyToManyField(related_name="follows", to=settings.AUTH_USER_MODEL),
         ),
         migrations.AddField(
-            model_name='page',
-            name='owner',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='pages', to=settings.AUTH_USER_MODEL),
+            model_name="page",
+            name="owner",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, related_name="pages", to=settings.AUTH_USER_MODEL
+            ),
         ),
         migrations.AddField(
-            model_name='page',
-            name='tags',
-            field=models.ManyToManyField(related_name='pages', to='pages.tag'),
+            model_name="page",
+            name="tags",
+            field=models.ManyToManyField(related_name="pages", to="pages.tag"),
         ),
     ]

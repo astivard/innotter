@@ -6,9 +6,9 @@ class User(AbstractUser):
     """User - admin/moderator/user"""
 
     class Roles(models.TextChoices):
-        USER = 'user'
-        MODERATOR = 'moderator'
-        ADMIN = 'admin'
+        USER = "user"
+        MODERATOR = "moderator"
+        ADMIN = "admin"
 
     email = models.EmailField(unique=True)
 

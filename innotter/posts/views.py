@@ -5,15 +5,11 @@ from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
 
 from posts.models import Post
-from posts.serializers import HomeSerializer, PostDetailSerializer, PostListSerializer
-from posts.services import (
-    get_following_pages_posts,
-    get_liked_posts,
-    get_posts,
-    like_post,
-    unlike_post,
-    get_page_name_and_followers_email_list,
-)
+from posts.serializers import (HomeSerializer, PostDetailSerializer,
+                               PostListSerializer)
+from posts.services import (get_following_pages_posts, get_liked_posts,
+                            get_page_name_and_followers_email_list, get_posts,
+                            like_post, unlike_post)
 from posts.tasks import send_email_to_subscribers
 from users.permissions import IsAdminRole, IsBlockedUser, IsModerRole
 
