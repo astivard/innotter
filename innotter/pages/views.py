@@ -100,7 +100,7 @@ class PagesViewSet(
         is_private, page_owner_id, is_follower = follow_page(user=self.request.user, page_pk=pk)
         if not is_private:
             if not is_follower:
-                data = {"method": "add_subscriber", "user_id": page_owner_id}
+                data = {"method": "add", "user_id": page_owner_id, "value": "subscribers"}
                 publish(body=data)
             return Response(
                 {"detail": "You have subscribed to the page or you are already a subscriber."},
@@ -115,7 +115,7 @@ class PagesViewSet(
     def unfollow(self, request, pk=None):
         page_owner_id, is_follower = unfollow_page(user=self.request.user, page_pk=pk)
         if is_follower:
-            data = {"method": "delete_subscriber", "user_id": page_owner_id}
+            data = {"method": "delete", "user_id": page_owner_id, "value": "subscribers"}
             publish(body=data)
         return Response(
             {"detail": "You have unsubscribed from the page or have already unsubscribed."},
@@ -201,7 +201,7 @@ class CurrentUserPagesViewSet(
         email = serializer.validated_data["email"]
         is_follow_request = accept_follow_request(follower_email=email, page_pk=pk)
         if is_follow_request:
-            data = {"method": "add_subscriber", "user_id": self.request.user.pk}
+            data = {"method": "add", "user_id": self.request.user.pk, "value": "subscribers"}
             publish(body=data)
         return Response(
             {"detail": "You have successfully accepted user to followers or user is already your follower."},
@@ -224,10 +224,11 @@ class CurrentUserPagesViewSet(
         follow_requests_number = accept_all_follow_requests(page_pk=pk)
         if follow_requests_number > 0:
             data = {
-                "method": "add_many_subscribers",
+                "method": "add",
                 "user_id": self.request.user.pk,
                 "requests": follow_requests_number,
                 "many": True,
+                "value": "subscribers"
             }
             publish(body=data)
         return Response({"detail": "You have successfully accepted all follow requests."}, status=status.HTTP_200_OK)
@@ -282,12 +283,12 @@ class CurrentUserPagesViewSet(
 
     def perform_create(self, serializer):
         serializer.save()
-        data = {"method": "add_page", "user_id": self.request.user.pk}
+        data = {"method": "add", "user_id": self.request.user.pk, "value": "pages"}
         publish(body=data)
 
     def perform_destroy(self, instance, **kwargs):
         instance.delete()
-        data = {"method": "delete_page", "user_id": self.request.user.pk}
+        data = {"method": "delete", "user_id": self.request.user.pk, "value": "pages"}
         publish(body=data)
 
     def get_queryset(self):

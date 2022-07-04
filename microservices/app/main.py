@@ -14,7 +14,6 @@ class App(FastAPI):
 
     @classmethod
     def handle_incoming_message(cls, body: dict):
-        print(body)
         methods_dict[body["method"]](body=body)
 
 

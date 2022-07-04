@@ -30,7 +30,7 @@ class PostsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Dest
 
     def perform_destroy(self, instance):
         instance.delete()
-        data = {"method": "delete_post"}
+        data = {"method": "delete", "value": "posts"}
         publish(body=data)
 
 
@@ -59,7 +59,7 @@ class UserPostsViewSet(
 
     def perform_create(self, serializer):
         serializer.save()
-        data = {"method": "add_post", "user_id": self.request.user.pk}
+        data = {"method": "add", "user_id": self.request.user.pk, "value": "posts"}
         publish(body=data)
         data.update(serializer.data)
         page_name_and_follower_emails = get_page_name_and_followers_email_list(page_pk=self.request.data["page"][0])
@@ -69,7 +69,7 @@ class UserPostsViewSet(
 
     def perform_destroy(self, instance, **kwargs):
         instance.delete()
-        data = {"method": "delete_post", "user_id": self.request.user.pk}
+        data = {"method": "delete", "user_id": self.request.user.pk, "value": "posts"}
         publish(body=data)
 
 
@@ -86,7 +86,7 @@ class HomeViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     def like(self, request, pk=None):
         is_liked, post_owner = like_post(user=self.request.user, post_pk=pk)
         if not is_liked:
-            data = {"method": "add_like", "user_id": post_owner}
+            data = {"method": "add", "user_id": post_owner, "value": "likes"}
             publish(body=data)
         return Response({"detail": "You have liked this post."})
 
@@ -94,7 +94,7 @@ class HomeViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
     def unlike(self, request, pk=None):
         is_liked, post_owner = unlike_post(user=self.request.user, post_pk=pk)
         if is_liked:
-            data = {"method": "delete_like", "user_id": post_owner}
+            data = {"method": "delete_like", "user_id": post_owner, "value": "likes"}
             publish(body=data)
         return Response({"detail": "You have unliked this post."})
 
