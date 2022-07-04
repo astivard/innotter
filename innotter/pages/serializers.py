@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from pages.models import Page, Tag
+from rest_framework import serializers
 from users.models import User
 
 

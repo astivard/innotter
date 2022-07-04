@@ -1,9 +1,8 @@
 from django.contrib import admin
 from django.urls import include, path
-from rest_framework import routers
-
 from pages.urls import router as pages_router
 from posts.urls import router as posts_router
+from rest_framework import routers
 from users.urls import router as users_router
 
 router = routers.DefaultRouter()

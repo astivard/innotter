@@ -1,8 +1,8 @@
+from posts.producer import publish
 from rest_framework import mixins, status
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.viewsets import GenericViewSet
-
 from users.models import User
 from users.permissions import IsAdminRole, IsBlockedUser
 from users.serializers import (UserDetailSerializer, UserListSerializer,
@@ -90,6 +90,11 @@ class UserRegistrationViewSet(mixins.CreateModelMixin, GenericViewSet):
     queryset = User.objects.all()
     serializer_class = UserRegistrationSerializer
     permission_classes = (AllowAny,)
+
+    def perform_create(self, serializer):
+        serializer.save()
+        data = {"method": "new_user", "id": serializer.data["id"]}
+        publish(body=data)
 
 
 class UserLoginViewSet(mixins.CreateModelMixin, GenericViewSet):

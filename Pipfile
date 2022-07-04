@@ -17,6 +17,8 @@ fastapi = "==0.78.0"
 uvicorn = "==0.18.1"
 pika = "==1.2.1"
 pydantic = "==1.9.1"
+aio-pika = "==8.0.3"
+python-jose = {version = "==3.3.0", extras = ["cryptography"]}
 
 [dev-packages]
 black = "==22.3.0"

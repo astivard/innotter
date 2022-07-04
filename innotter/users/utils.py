@@ -3,10 +3,10 @@ import jwt
 from django.contrib.auth.hashers import make_password
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-
-from innotter.settings import JWT_SECRET
 from users.models import User
 from users.services import create_jwt_token_dict
+
+from innotter.settings import JWT_SECRET
 
 
 class UserRegistrationSerializerMethods(serializers.ModelSerializer):

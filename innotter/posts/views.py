@@ -1,16 +1,16 @@
-from rest_framework import mixins, status
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-
 from posts.models import Post
+from posts.producer import publish
 from posts.serializers import (HomeSerializer, PostDetailSerializer,
                                PostListSerializer)
 from posts.services import (get_following_pages_posts, get_liked_posts,
                             get_page_name_and_followers_email_list, get_posts,
                             like_post, unlike_post)
 from posts.tasks import send_email_to_subscribers
+from rest_framework import mixins, status
+from rest_framework.decorators import action
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from users.permissions import IsAdminRole, IsBlockedUser, IsModerRole
 
 
@@ -27,6 +27,11 @@ class PostsViewSet(mixins.ListModelMixin, mixins.RetrieveModelMixin, mixins.Dest
         IsAdminRole | IsModerRole,
     )
     serializer_class = PostListSerializer
+
+    def perform_destroy(self, instance):
+        instance.delete()
+        data = {"method": "delete_post"}
+        publish(body=data)
 
 
 class UserPostsViewSet(
@@ -54,10 +59,18 @@ class UserPostsViewSet(
 
     def perform_create(self, serializer):
         serializer.save()
+        data = {"method": "add_post", "user_id": self.request.user.pk}
+        publish(body=data)
+        data.update(serializer.data)
         page_name_and_follower_emails = get_page_name_and_followers_email_list(page_pk=self.request.data["page"][0])
         send_email_to_subscribers.delay(
             page=page_name_and_follower_emails[0], follower_list=page_name_and_follower_emails[1]
         )
+
+    def perform_destroy(self, instance, **kwargs):
+        instance.delete()
+        data = {"method": "delete_post", "user_id": self.request.user.pk}
+        publish(body=data)
 
 
 class HomeViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewSet):
@@ -71,12 +84,18 @@ class HomeViewSet(mixins.RetrieveModelMixin, mixins.ListModelMixin, GenericViewS
 
     @action(detail=True, methods=["post"], url_path="like")
     def like(self, request, pk=None):
-        like_post(user=self.request.user, post_pk=pk)
+        is_liked, post_owner = like_post(user=self.request.user, post_pk=pk)
+        if not is_liked:
+            data = {"method": "add_like", "user_id": post_owner}
+            publish(body=data)
         return Response({"detail": "You have liked this post."})
 
     @action(detail=True, methods=["post"], url_path="unlike")
     def unlike(self, request, pk=None):
-        unlike_post(user=self.request.user, post_pk=pk)
+        is_liked, post_owner = unlike_post(user=self.request.user, post_pk=pk)
+        if is_liked:
+            data = {"method": "delete_like", "user_id": post_owner}
+            publish(body=data)
         return Response({"detail": "You have unliked this post."})
 
     @action(detail=False, methods=["get"], url_path="liked")

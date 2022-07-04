@@ -151,7 +151,7 @@ ALLOWED_FILE_EXTENSIONS = (
 
 DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL")
 
-CELERY_BROKER_URL = "amqp://guest:guest@rabbit:5672/"
+CELERY_BROKER_URL = "amqp://guest:guest@rabbitmq:5672/"
 CELERY_BROKER_TRANSPORT_OPTIONS = {"visibility_timeout": 3600}
 CELERY_ACCEPT_CONTENT = ("application/json",)
 CELERY_TASK_SERIALIZER = "json"

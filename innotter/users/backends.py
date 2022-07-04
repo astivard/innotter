@@ -1,8 +1,8 @@
 import jwt
 from rest_framework import authentication, exceptions
+from users.models import User
 
 from innotter.settings import JWT_SECRET
-from users.models import User
 
 
 class JWTAuthentication(authentication.BaseAuthentication):
