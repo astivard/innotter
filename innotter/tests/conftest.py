@@ -28,11 +28,3 @@ def auth_user(register_user, client):
     access_token = response.data["access"]
     client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
     return client
-
-
-@pytest.fixture
-def pages(register_user, client):
-    response = client.post(path="/api/v1/login/", data=dict(email="test_user@gmail.com", password="test_user_password"))
-    access_token = response.data["access"]
-    client.credentials(HTTP_AUTHORIZATION=f"Bearer {access_token}")
-    return client
