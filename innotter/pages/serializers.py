@@ -3,8 +3,8 @@ from rest_framework import serializers
 from users.models import User
 
 
-class UserPageListSerializer(serializers.ModelSerializer):
-    """Serializer for list of pages for users."""
+class PageListSerializer(serializers.ModelSerializer):
+    """Serializer for list of pages for any user."""
 
     owner = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
@@ -18,14 +18,6 @@ class UserPageListSerializer(serializers.ModelSerializer):
             "is_private",
             "is_blocked",
         )
-
-
-class StaffPageListSerializer(serializers.ModelSerializer):
-    """Serializer for list of pages for admins."""
-
-    class Meta:
-        model = Page
-        fields = ("id", "name", "uuid", "owner", "owner_id", "is_private", "is_blocked", "unblock_date")
 
 
 class PageDetailSerializer(serializers.ModelSerializer):

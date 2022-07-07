@@ -1,4 +1,4 @@
-version: "3.10"
+version: "3"
 
 services:
   web:
@@ -13,7 +13,7 @@ services:
       - ./.env
     depends_on:
       - db
-      - rabbit
+      - rabbitmq
     restart: on-failure
 
   microservice:
@@ -40,6 +40,11 @@ services:
     ports:
       - 5672:5672
       - 15672:15672
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:15672"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
 
   celery:
     restart: always
@@ -53,7 +58,7 @@ services:
     ports:
       - "5555:5555"
     depends_on:
-      - rabbit
+      - rabbitmq
 
 volumes:
   innotter_pg_data:
