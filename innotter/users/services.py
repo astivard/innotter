@@ -3,12 +3,12 @@ from datetime import datetime, timedelta
 import boto3
 import jwt
 from django.conf import settings
-from rest_framework.exceptions import NotFound, ValidationError
-
-from innotter.settings import JWT_ACCESS_TTL, JWT_REFRESH_TTL, JWT_SECRET
 from pages.models import Page
 from pages.tasks import upload_file_to_s3
+from rest_framework.exceptions import NotFound, ValidationError
 from users.models import User
+
+from innotter.settings import JWT_ACCESS_TTL, JWT_REFRESH_TTL, JWT_SECRET
 
 
 def upload_user_image_to_s3(file_path: str, user: User) -> str:

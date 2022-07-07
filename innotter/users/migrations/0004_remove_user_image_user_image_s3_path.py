@@ -6,17 +6,17 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('users', '0003_remove_user_image_s3_path_user_image'),
+        ("users", "0003_remove_user_image_s3_path_user_image"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='user',
-            name='image',
+            model_name="user",
+            name="image",
         ),
         migrations.AddField(
-            model_name='user',
-            name='image_s3_path',
+            model_name="user",
+            name="image_s3_path",
             field=models.CharField(blank=True, max_length=200, null=True),
         ),
     ]

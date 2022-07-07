@@ -1,11 +1,10 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from rest_framework.exceptions import NotFound, ValidationError
-from rest_framework.response import Response
-
 from pages.models import Page, Tag
 from pages.tasks import upload_file_to_s3
+from rest_framework.exceptions import NotFound, ValidationError
+from rest_framework.response import Response
 from users.models import User
 from users.services import (generate_file_name, get_presigned_url,
                             is_allowed_file_extension)
@@ -38,25 +37,30 @@ def get_page_follow_requests(page_pk: int) -> Response:
     return get_object_or_404(Page, pk=page_pk).follow_requests.all().order_by("id")
 
 
-def follow_page(user: User, page_pk: int) -> bool:
+def follow_page(user: User, page_pk: int) -> tuple:
     page = get_object_or_404(Page, pk=page_pk)
+    is_user_follower = page.followers.contains(user)
     if page.is_private:
         page.follow_requests.add(user)
-        return True
+        return True, page.owner.pk, page.followers.contains(user)
     page.followers.add(user)
-    return False
+    return False, page.owner.pk, is_user_follower
 
 
-def unfollow_page(user: User, page_pk: int) -> None:
+def unfollow_page(user: User, page_pk: int) -> tuple:
     page = get_object_or_404(Page, pk=page_pk)
-    page.follow_requests.remove(user)
+    is_user_follower = page.followers.contains(user)
+    page.followers.remove(user)
+    return page.owner.pk, is_user_follower
 
 
-def accept_follow_request(follower_email: str, page_pk: int) -> None:
+def accept_follow_request(follower_email: str, page_pk: int) -> bool:
     page = get_object_or_404(Page, pk=page_pk)
     potential_follower = get_object_or_404(User, email=follower_email)
+    is_follow_request = page.follow_requests.contains(potential_follower)
     page.followers.add(potential_follower)
     page.follow_requests.remove(potential_follower)
+    return is_follow_request
 
 
 def deny_follow_request(follower_email: str, page_pk: int) -> None:
@@ -65,13 +69,16 @@ def deny_follow_request(follower_email: str, page_pk: int) -> None:
     page.follow_requests.remove(potential_follower)
 
 
-def accept_all_follow_requests(page_pk: int) -> None:
+def accept_all_follow_requests(page_pk: int) -> int:
     page = get_object_or_404(Page, pk=page_pk)
     follow_requests = page.follow_requests.all()
+    follow_requests_number = 0
     if follow_requests:
         for potential_follower in follow_requests:
+            follow_requests_number += 1
             page.followers.add(potential_follower)
             page.follow_requests.remove(potential_follower)
+    return follow_requests_number
 
 
 def deny_all_follow_requests(page_pk: int) -> None:

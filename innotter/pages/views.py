@@ -1,10 +1,3 @@
-from rest_framework import mixins, status
-from rest_framework.decorators import action
-from rest_framework.filters import SearchFilter
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.viewsets import GenericViewSet
-
 from pages.models import Page, Tag
 from pages.serializers import (AddRemoveTagSerializer,
                                AdminPageDetailSerializer, FollowerSerializer,
@@ -21,6 +14,13 @@ from pages.services import (accept_all_follow_requests, accept_follow_request,
                             get_permissions_list, get_unblocked_pages,
                             remove_tag_from_page, unfollow_page,
                             upload_page_image_to_s3)
+from posts.producer import publish
+from rest_framework import mixins, status
+from rest_framework.decorators import action
+from rest_framework.filters import SearchFilter
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.viewsets import GenericViewSet
 from users.permissions import IsAdminRole, IsBlockedUser, IsModerRole
 from users.services import get_presigned_url
 
@@ -97,8 +97,11 @@ class PagesViewSet(
 
     @action(detail=True, methods=["post"], url_path="follow")
     def follow(self, request, pk=None):
-        is_private = follow_page(user=self.request.user, page_pk=pk)
+        is_private, page_owner_id, is_follower = follow_page(user=self.request.user, page_pk=pk)
         if not is_private:
+            if not is_follower:
+                data = {"method": "add", "user_id": page_owner_id, "value": "subscribers"}
+                publish(body=data)
             return Response(
                 {"detail": "You have subscribed to the page or you are already a subscriber."},
                 status=status.HTTP_200_OK,
@@ -110,7 +113,10 @@ class PagesViewSet(
 
     @action(detail=True, methods=["post"], url_path="unfollow")
     def unfollow(self, request, pk=None):
-        unfollow_page(user=self.request.user, page_pk=pk)
+        page_owner_id, is_follower = unfollow_page(user=self.request.user, page_pk=pk)
+        if is_follower:
+            data = {"method": "delete", "user_id": page_owner_id, "value": "subscribers"}
+            publish(body=data)
         return Response(
             {"detail": "You have unsubscribed from the page or have already unsubscribed."},
             status=status.HTTP_200_OK,
@@ -193,7 +199,10 @@ class CurrentUserPagesViewSet(
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         email = serializer.validated_data["email"]
-        accept_follow_request(follower_email=email, page_pk=pk)
+        is_follow_request = accept_follow_request(follower_email=email, page_pk=pk)
+        if is_follow_request:
+            data = {"method": "add", "user_id": self.request.user.pk, "value": "subscribers"}
+            publish(body=data)
         return Response(
             {"detail": "You have successfully accepted user to followers or user is already your follower."},
             status=status.HTTP_200_OK,
@@ -212,7 +221,16 @@ class CurrentUserPagesViewSet(
 
     @action(detail=True, methods=["post"], url_path="accept-all")
     def accept_all_follow_requests(self, request, pk=None):
-        accept_all_follow_requests(page_pk=pk)
+        follow_requests_number = accept_all_follow_requests(page_pk=pk)
+        if follow_requests_number > 0:
+            data = {
+                "method": "add",
+                "user_id": self.request.user.pk,
+                "requests": follow_requests_number,
+                "many": True,
+                "value": "subscribers"
+            }
+            publish(body=data)
         return Response({"detail": "You have successfully accepted all follow requests."}, status=status.HTTP_200_OK)
 
     @action(detail=True, methods=["post"], url_path="deny-all")
@@ -262,6 +280,16 @@ class CurrentUserPagesViewSet(
         image_s3_path = serializer.validated_data["image_s3_path"]
         page_id = serializer.data["id"]
         serializer.validated_data["image_s3_path"] = upload_page_image_to_s3(file_path=image_s3_path, page_id=page_id)
+
+    def perform_create(self, serializer):
+        serializer.save()
+        data = {"method": "add", "user_id": self.request.user.pk, "value": "pages"}
+        publish(body=data)
+
+    def perform_destroy(self, instance, **kwargs):
+        instance.delete()
+        data = {"method": "delete", "user_id": self.request.user.pk, "value": "pages"}
+        publish(body=data)
 
     def get_queryset(self):
         return get_unblocked_pages(is_owner_page=True, owner=self.request.user)

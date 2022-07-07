@@ -1,7 +1,6 @@
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-
 from pages.models import Page
 from posts.models import Post
 from users.models import User
@@ -25,14 +24,20 @@ def get_liked_posts(user: User) -> Post:
     return Post.objects.filter(likers=user).order_by("created_at")
 
 
-def like_post(user: User, post_pk: int) -> None:
+def like_post(user: User, post_pk: int) -> tuple:
     post = get_object_or_404(Post, pk=post_pk)
+    post_owner = post.page.owner.pk
+    is_liked = post.likers.contains(user)
     post.likers.add(user)
+    return is_liked, post_owner
 
 
-def unlike_post(user: User, post_pk: int) -> None:
+def unlike_post(user: User, post_pk: int) -> tuple:
     post = get_object_or_404(Post, pk=post_pk)
+    post_owner = post.page.owner.pk
+    is_liked = post.likers.contains(user)
     post.likers.remove(user)
+    return is_liked, post_owner
 
 
 def get_page_name_and_followers_email_list(page_pk: int) -> (list, str):

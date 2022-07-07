@@ -1,6 +1,5 @@
-from rest_framework import serializers
-
 from posts.models import Post
+from rest_framework import serializers
 
 
 class PostListSerializer(serializers.ModelSerializer):
@@ -16,11 +15,22 @@ class PostDetailSerializer(serializers.ModelSerializer):
 
     page_name = serializers.SerializerMethodField()
     reply_to_content = serializers.SerializerMethodField(allow_null=True)
+    likers = serializers.SlugRelatedField(many=True, read_only=True, slug_field="username")
 
     class Meta:
         model = Post
-        fields = ("id", "content", "page", "page_name", "reply_to", "reply_to_content", "created_at", "updated_at")
-        read_only_fields = ("page", "created_at", "updated_at")
+        fields = (
+            "id",
+            "content",
+            "page",
+            "page_name",
+            "reply_to",
+            "reply_to_content",
+            "created_at",
+            "updated_at",
+            "likers",
+        )
+        read_only_fields = ("page", "created_at", "updated_at", "likers")
 
     def get_page_name(self, post):
         return post.page.name
