@@ -3,9 +3,8 @@ from pages.serializers import (AddRemoveTagSerializer,
                                AdminPageDetailSerializer, FollowerSerializer,
                                FollowersListSerializer,
                                ModerPageDetailSerializer, PageDetailSerializer,
-                               StaffPageListSerializer, TagSerializer,
-                               UserPageDetailSerializer,
-                               UserPageListSerializer)
+                               PageListSerializer, TagSerializer,
+                               UserPageDetailSerializer)
 from pages.services import (accept_all_follow_requests, accept_follow_request,
                             add_tag_to_page, deny_all_follow_requests,
                             deny_follow_request, follow_page,
@@ -64,16 +63,16 @@ class PagesViewSet(
         "unfollow": (IsAuthenticated, ~IsBlockedUser),
     }
 
-    list_serializer_classes = {
-        "admin": StaffPageListSerializer,
-        "moderator": StaffPageListSerializer,
-        "user": UserPageListSerializer,
-    }
-
     detail_serializer_classes = {
         "admin": AdminPageDetailSerializer,
         "moderator": ModerPageDetailSerializer,
         "user": PageDetailSerializer,
+    }
+
+    list_serializer_classes = {
+        "list": PageListSerializer,
+        "blocked": PageListSerializer,
+        "followers": FollowersListSerializer,
     }
 
     filter_backends = (SearchFilter,)
@@ -138,12 +137,9 @@ class PagesViewSet(
         return get_unblocked_pages(is_owner_page=False)
 
     def get_serializer_class(self):
-        user_role = self.request.user.role
-        if self.action in ("list", "blocked"):
-            return self.list_serializer_classes.get(user_role)
-        elif self.action == "followers":
-            return FollowersListSerializer
-        return self.detail_serializer_classes.get(user_role)
+        if self.action in ("retrieve", "update", "partial_update", "follow", "unfollow"):
+            return self.detail_serializer_classes.get(self.request.user.role)
+        return self.list_serializer_classes.get(self.action)
 
     def get_permissions(self):
         return get_permissions_list(self, permission_classes_dict=self.action_permission_classes)
@@ -168,8 +164,8 @@ class CurrentUserPagesViewSet(
     )
 
     serializer_classes = {
-        "list": UserPageListSerializer,
-        "create": UserPageListSerializer,
+        "list": PageListSerializer,
+        "create": PageListSerializer,
         "page_follow_requests": FollowersListSerializer,
         "all_follow_requests": FollowersListSerializer,
         "followers": FollowersListSerializer,
